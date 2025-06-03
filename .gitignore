@@ -7,6 +7,10 @@ __pycache__/
 sim_build/
 *.so
 result.xml
+a.out
+*.out
+*.log
+*.vcd
 
 # Distribution / packaging
 .Python
