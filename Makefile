@@ -1,16 +1,13 @@
-# Makefile for cocotb simulation
+# Makefile for running Cocotb test with Icarus Verilog
 
 TOPLEVEL_LANG = verilog
+TOPLEVEL = device_b
+MODULE = test_device_a
 
-VERILOG_SOURCES = $(shell pwd)/RTL/MatrixMulEngine.v
-TOPLEVEL = MatrixMulEngine
-MODULE = test_matrix_mul
+VERILOG_SOURCES = $(shell pwd)/RTL/device_b.v $(shell pwd)/RTL/spi_slave.v
 
-# Choose your simulator: iverilog or vcs
 SIM = icarus
-# EXTRA_ARGS += -y $(shell pwd)/RTL/
-# For VCS, uncomment below:
-# SIM = vcs
-# ulimit -v $((4 * 1024 * 1024))  # 4 GB limit
+WAVES = 1
 
+# Cocotb build system
 include $(shell cocotb-config --makefiles)/Makefile.sim
