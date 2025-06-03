@@ -6,7 +6,7 @@ __pycache__/
 # C extensions
 sim_build/
 *.so
-result.xml
+results.xml
 a.out
 *.out
 *.log

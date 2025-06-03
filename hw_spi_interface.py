@@ -19,7 +19,7 @@ def hw_spi_call(input_hex):
         raise RuntimeError("Cocotb simulation timed out.")
 
     # Log output for debug
-    print(result.stdout)
+    # print(result.stdout)
 
     # Search output value in cocotb logs
     match = re.search(r"\[TB\] Received\s+: 0x([0-9A-Fa-f]+)", result.stdout)
