@@ -1,6 +1,6 @@
 <testsuites name="results">
   <testsuite name="all" package="all">
-    <property name="random_seed" value="1748939385" />
-    <testcase name="spi_roundtrip_fsm_test" classname="test_device_a" file="/mnt/d/PSU/HW_For_AI_teuscher/Week_8/W08_C25_SPI_for_CNN/test_device_a.py" lineno="7" time="0.04305696487426758" sim_time_ns="1570.001" ratio_time="36463.34581605147" />
+    <property name="random_seed" value="1748940172" />
+    <testcase name="spi_roundtrip_fsm_test" classname="test_device_a" file="/mnt/d/PSU/HW_For_AI_teuscher/Week_8/W08_C25_SPI_for_CNN/test_device_a.py" lineno="9" time="0.04051780700683594" sim_time_ns="1570.001" ratio_time="38748.41991658429" />
   </testsuite>
 </testsuites>

@@ -1,12 +1,18 @@
 import cocotb
 from cocotb.clock import Clock
 from cocotb.triggers import RisingEdge, Timer
+import os
+
 cocotb.logging.getLogger("cocotb").setLevel("DEBUG")
 
 
 @cocotb.test()
 async def spi_roundtrip_fsm_test(dut):
     """Behavioral Python model of device_a FSM interacting with device_b Verilog via SPI."""
+
+    # Load TX_DATA from environment variable
+    tx_data_str = os.environ.get("TX_DATA", "0x12345678")
+    tx_data = int(tx_data_str, 16)
 
     # Start system clock (100 MHz)
     cocotb.start_soon(Clock(dut.clk, 10, units="ns").start())
@@ -40,7 +46,6 @@ async def spi_roundtrip_fsm_test(dut):
     spi_state = SPI_IDLE
 
     # Internal registers
-    tx_data = 0x12345678
     rx_shift = 0
     bit_cnt = 0
     spi_shift = 0
@@ -52,7 +57,7 @@ async def spi_roundtrip_fsm_test(dut):
 
     dut._log.info(f"[TB] Starting SPI roundtrip with tx_data = 0x{tx_data:08X}")
 
-    for cycle in range(100000):  # prevent infinite loop
+    for cycle in range(100000):
         await RisingEdge(dut.clk)
         sclk_rising = (int(dut.sclk.value) == 1 and sclk_d == 0)
         sclk_d = int(dut.sclk.value)
@@ -72,7 +77,6 @@ async def spi_roundtrip_fsm_test(dut):
 
         elif spi_state == SPI_TRANSFER:
             dut.sclk.value = int(not dut.sclk.value)
-
             if int(dut.sclk.value) == 0:
                 dut.mosi.value = (spi_shift >> spi_bit_cnt) & 1
             else:
@@ -100,7 +104,6 @@ async def spi_roundtrip_fsm_test(dut):
 
         # Main FSM
         if state == IDLE:
-            tx_data = 0x12345678
             hold_cs = True
             dut._log.info("[FSM] -> SEND_PHASE1")
             state = SEND_PHASE1
@@ -117,23 +120,19 @@ async def spi_roundtrip_fsm_test(dut):
 
         elif state == LOAD_DUMMY:
             tx_data = 0
-            # dut._log.info("[FSM] -> SEND_PHASE2")
             dut._log.info("[FSM] -> RECEIVE")
             send_ph2 = True
             state = RECEIVE
 
         elif state == RECEIVE:
-            # print(f"dut.cs_n.value = {dut.cs_n.value} and sclk_rising = {sclk_rising}")
             if send_ph2:
                 bit_cnt = 0
                 rx_shift = 0
                 send_ph2 = False
             elif (int(dut.cs_n.value) == 0) and (int(dut.u_spi_slave.sclk_rising) == 1):
-                # await RisingEdge(dut.clk)
                 sampled_bit = int(dut.miso.value)
                 rx_shift = ((rx_shift << 1) | sampled_bit) & 0xFFFFFFFF
-                dut._log.debug(f"[RECEIVE] Bit {bit_cnt}: {sampled_bit}, dut.miso.value: {dut.miso.value}, Shift Reg: {rx_shift:08X}")
-                # print(f"{dut._sim_time}ns : MISO={sampled_bit}, rx_shift={rx_shift:08X}")
+                dut._log.debug(f"[RECEIVE] Bit {bit_cnt}: {sampled_bit}, Shift Reg: {rx_shift:08X}")
                 bit_cnt += 1
                 if bit_cnt == 32:
                     dut._log.info("[FSM] -> DONE")
@@ -145,7 +144,7 @@ async def spi_roundtrip_fsm_test(dut):
             break
 
     # Final check
-    expected = (0x12345678 + 1) & 0xFFFFFFFF
+    expected = (int(tx_data_str, 16) + 1) & 0xFFFFFFFF
     dut._log.info(f"[TB] Received  : 0x{rx_shift:08X}")
     dut._log.info(f"[TB] Expected  : 0x{expected:08X}")
     assert rx_shift == expected, "[FAIL] SPI response does not match expected value"
