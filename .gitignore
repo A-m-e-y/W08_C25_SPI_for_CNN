@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 
 # C extensions
+sim_build/
 *.so
 
 # Distribution / packaging
