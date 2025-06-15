@@ -16,8 +16,8 @@ Designing a bi-directional SPI channel for sending and receiving data to a Matri
   - [Other Files](#other-files)
 - [Detailed Data Flow](#detailed-data-flow)
 - [How to Run the Project](#how-to-run-the-project)
-- [Testing and Verification](#testing-and-verification)
-- [License](#license)
+- [Results](#results)
+- [How everything connects](#how-everything-connects)
 
 ---
 
@@ -239,6 +239,25 @@ Makefile for running cocotb-based simulation with Icarus Verilog.
   - Use [`RTL/tb_spi_top.v`](RTL/tb_spi_top.v) for traditional Verilog simulation and waveform viewing.
   - Use cocotb's logging and generated waveforms for debugging Python-driven simulations.
 
+---
+
+## Results
+```bash
+❯ iverilog RTL/tb_spi_top.v -y ./RTL/ && vvp a.out
+VCD info: dumpfile spi_waveform.vcd opened for output.
+=== Bi-Directional SPI Round Trip Test ===
+[TB] Sending data to B: 0x3f004089
+[TB] B received      : 0x3f004089
+[TB] A received reply: 0x3f00408a
+SPI transfer time: 2740000 ns for 32 bits (4 Bytes) data
+[PASS] Round-trip SPI exchange successful!
+SPI throughput = 11.68 Mbps
+RTL/tb_spi_top.v:102: $finish called at 2850000 (1ps)
+
+```
+
+- The SPI Benchmark shows I can send and receive 32 bits data in – **2.74 ms**
+- So one-way latency per word = 2.74 ms / 2 = **1.37 ms**
 ---
 
 ## How Everything Connects

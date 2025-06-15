@@ -12,6 +12,11 @@ module tb_top;
     wire response_ready;
     wire done_B_to_A;
 
+    // for measuring performance.
+    time spi_start_time;
+    time spi_end_time;
+    real throughput_mbps;
+
     // Instantiate the top module
     spi_top uut (
         .clk(clk),
@@ -64,16 +69,22 @@ module tb_top;
         // Generate a random 32-bit float-style value
         expected_send = random_float32(0);
         expected_response = expected_send + 1;
+
+        // Start the timer
+        $display("[TB] Sending data to B: 0x%08X", expected_send);
+        spi_start_time = $time;
         in_data_A = expected_send;
 
-        $display("[TB] Sending data to B: 0x%08X", expected_send);
 
         // Wait until response is received
         wait (done_B_to_A == 1);
+        spi_end_time = $time;
         @(posedge clk);  // Let output stabilize
+        // Stop the timer
 
         $display("[TB] B received      : 0x%08X", out_data_B);
         $display("[TB] A received reply: 0x%08X", out_data_A);
+        $display("SPI transfer time: %0t ns for 32 bits (4 Bytes) data", spi_end_time - spi_start_time);
 
         // Check B received the original value
         if (out_data_B !== expected_send) begin
@@ -83,6 +94,10 @@ module tb_top;
         end else begin
             $display("[PASS] Round-trip SPI exchange successful!");
         end
+
+        throughput_mbps = (32.0 / (spi_end_time - spi_start_time)) * 1000.0;
+        $display("SPI throughput = %0.2f Mbps", throughput_mbps);
+
 
         $finish;
     end
